@@ -6,3 +6,7 @@ wykresy1.xls
 venv
 .idea
 __pycache__
+build
+dist
+plot_graphs.spec
+data
