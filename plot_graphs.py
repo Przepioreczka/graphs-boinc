@@ -13,7 +13,7 @@ def plot_save(directory: str):
     for i in range(3, len(DF)):
 
         x, y, colors, title, sub_title = get_data_params(directory, i, start)
-        file_name = names[i-3]+'.png'
+        file_name = names[i-3]
         plot_graphs(x, y, colors, title, sub_title, file_name, width=1200, height=height)
 
 

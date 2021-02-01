@@ -10,7 +10,7 @@ def get_params(df):
     else:
         name = input('Enter name for your graphs:')
         start = 2
-        names = [name + str(i) + '.png' for i in range(df.shape[1]-start)]
+        names = [name + str(i) for i in range(df.shape[1]-start)]
 
     bars = df.shape[1]-start
     height = bars * 100
@@ -80,4 +80,4 @@ def plot_graphs(x, y, colorsbar, title, sub_title, im_name, width=500, height=15
     )
     fig.update_xaxes(color='black')
     fig.update_yaxes(tickfont_size=13, color='black')
-    fig.write_image(im_name)
+    fig.write_image(im_name+'.png', format='png')
