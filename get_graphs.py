@@ -1,119 +1,10 @@
-from typing import Iterable, List, Tuple
+from typing import List
 
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
-
-def get_params(df: pd.DataFrame) -> Tuple[int, Iterable[str], int]:
-    """This function takes DataFrame and gets parameters necessary for plotting and
-    saving graphs.
-
-    :param df: df must be pandas DataFrame, whole data
-    :type df: pandas.DataFrame
-    :return: tuple of
-        - (start) integer specifying from which row in df we should take data;
-        - (names)list of names for each row for each data series,
-        - names for png files of plotted graphs;
-        - (height) height of graphs depending on number of parameters (bars to plot)
-    :rtype: tuple
-    """
-    # If we find "Unnamed" in 3rd column then it means we are provided with filenames,
-    # for each series graph, in that column.
-    if "Unnamed" in df.columns[2]:
-        names = df[df.columns[2]][
-            3:
-        ].values  # names for graphs in 3rd column, starting from 4th row
-        start = 3  # data starting from column 4th
-
-    else:
-        name = input(
-            "Enter name for your graphs:"
-        )  # We need to ask user for filename if there are none in DataFrame
-        start = 2  # data starting from column 3rd
-        names = [
-            name + str(i) for i in range(df.shape[1] - start)
-        ]  # Filenames = user input + consecutive numbers
-
-    no_of_bars = df.shape[1] - start
-    graph_height = no_of_bars * 100
-    return start, names, graph_height
-
-
-def get_data_params(
-    path: str, number: int, col_start: int
-) -> Tuple[np.ndarray, List[str], List[str], str]:
-    """Processing data series, and extracting features necessary for plotting graph
-
-    :param path: path to xls file where data series is stored
-    :type path: str
-    :param number: which row will be processed to plot graph
-    :type number: int
-    :param col_start: column fom which data series begins, must be 2 or 3
-    :type col_start: int
-    :return: tuple of
-        - (X) prepared data series;
-        - (y) prepared y labels/y axis data;
-        - (colors) what color will each bar have;
-        - (title) title for graph
-    :rtype: tuple"""
-    # Reading data
-    df = pd.read_excel(io=path)
-    data = df.loc[[0, 1, 2, number]].T.dropna(thresh=1, subset=[number])
-
-    title = data.iat[0, 3]  # Title for whole graph
-    sub_title = data.iat[1, 3]  # Subtitle for whole graph
-    title = (
-        "<b>" + title + "</b><br><sup>" + sub_title + "</sup>"
-    )  # combining title and sub_title into one
-    asc = True  # How bars will be sorted - default ascending
-    # Information about ascending or descending sort format is in sub_title
-    if "mniej" in sub_title:
-        asc = False  # descending
-    data = data[col_start:].sort_values(number, ascending=asc).T  # raw data, sorted
-    headers = list(data)  # names of y ticks
-    subheaders = list(data.iloc[0])  # sub names for y ticks
-    # which y ticks labels should be bold
-    bolds = np.array(data.iloc[2])
-    bolds = np.where(bolds == 1)[0]
-    # extract colors for each bar
-    colors = np.array(data.loc[1].values)
-    colors[
-        np.argwhere(colors != colors).flatten()
-    ] = " grey"  # if color was missing, set to grey
-    colors = list(colors)
-    # while parsing, occurred some bug, colors codes/names start from second char
-    colors = list(map(lambda q: q[1:], colors))
-    # Checking if the subheaders are missing values
-    if subheaders.count(subheaders[0]) == len(subheaders):
-        y = headers  # only headers set to y variable
-        # Loop for formatting y ticks
-        for ind in range(len(y)):
-            if ind in bolds:  # Formatting as bold if found in bolds
-                y[ind] = "<b>" + y[ind] + "</b>"
-            y[ind] = y[ind] + "    "  # For better visual appearance
-
-    # We have to combine headers and subheaders into one as y ticks
-    else:
-        y = []
-        for ind in range(len(headers)):
-            x = headers[ind]
-            # If header name occurred twice,
-            # pandas (by transposition) adds .1 at the end
-            if x[-2:] == ".1":
-                x = x[:-2]
-            temp = subheaders[ind]
-            if ind in bolds:
-                y.append(
-                    "<b>" + x + "</b>    " + "<br><sup>" + temp + "</sup>    "
-                )  # bold only header if in the bolds
-                # <sup> is for superscript the subheaders
-            else:
-                y.append(
-                    x + "    <br><sup>" + temp + "</sup>    "
-                )  # only superscript the subheaders
-
-    return np.array(data.values[3].astype(float)), y, colors, title
+from GraphsPlotly import DataPlotly
 
 
 def plot_graphs(
@@ -123,7 +14,7 @@ def plot_graphs(
     title: str,
     im_name: str,
     width=500,
-    height=1500,
+    xlim=None,
 ) -> None:
     """Function for plotting prepared data in plotly library.
 
@@ -139,8 +30,6 @@ def plot_graphs(
     :type im_name: str
     :param width: graph width in pixels, default to 500
     :type width: int
-    :param height: graph height in pixels, default to 1500
-    :type height: int
     """
     # each bar width set to 0.5
     bar_width = np.zeros(len(x)) + 0.5
@@ -162,7 +51,7 @@ def plot_graphs(
     fig.update_layout(
         autosize=True,
         width=width,
-        height=height,
+        height=len(x) * 100,
     )
     # specifying title, title position, font
     fig.update_layout(
@@ -171,8 +60,86 @@ def plot_graphs(
         template="plotly_white",
         title_font=dict(size=26, color="black"),
     )
+    if xlim:
+        fig.update_layout(xaxis_range=xlim)
     # fixing visual presentation
     fig.update_xaxes(color="black")
-    fig.update_yaxes(tickfont_size=13, color="black")
+    fig.update_yaxes(tickfont_size=15, color="black")
     # saving graph to png file with given name
     fig.write_image(im_name + ".png", format="png")
+
+
+def plot_save(graph_plotly: DataPlotly, number: int) -> None:
+    """Function for saving one data series from graph_plotly data
+
+    :param graph_plotly: data series specified by number
+    :type graph_plotly: DataPlotly
+    :param number: which data series to plot
+    :type number: int
+    """
+    graph_plotly.set_number(number)  # setting number (row) of data series
+    title = (
+        graph_plotly.get_title_and_sort()
+    )  # extracting title and setting sort (asc/desc)
+    x = graph_plotly.get_series()  # extracting series data in proper order
+    y = graph_plotly.get_y_labels()  # extracting labels in proper order
+    colors = graph_plotly.get_colors()  # extracting colors in proper order
+    name = graph_plotly.file_names[number - 3]  # extracting file name to save
+    plot_graphs(x, y, colors, title, name, width=1200)
+
+
+def multiple_save(path: str):
+    """Function for extracting data and saving graphs of all series in xls file.
+
+    :param path: path to xls file
+    :type path: str
+    """
+    df = pd.read_excel(io=path)
+    gp = DataPlotly(df)
+    for i in range(3, len(df)):  # rows with data series starts from 4th row
+        plot_save(gp, i)
+
+
+def compare_plot(path: str):
+    """Function plotting and saving graph which is comparison
+    of two data series in xls file.
+
+    :param path: path to xls file
+    :type path: str
+    """
+    df = pd.read_excel(io=path)
+    # from which row in dataframe columns proper data starts
+    start = df.iloc[:, 1].first_valid_index()
+    filename = df.iloc[:, 2].dropna().values  # file name should be in 3rd column
+    if not filename:  # if none provided ask for it
+        filename = [input("Enter name for your graph: ")]
+    title = df.iloc[:, 0].dropna().values  # title and subtitle in first column
+    # in subtitle should be specified which series will be referential series
+    if df.columns[-1] in title[1]:
+        ref = -1
+        norm = -2
+    else:
+        ref = -2
+        norm = -1
+    title = "<b>" + "</b><br>".join(title)
+    series_names = df.iloc[:, 1].dropna().values  # name of each bar (y labels)
+    ref_series = df.iloc[start:, ref].dropna().values  # 100% - referential series
+    series = df.iloc[start:, norm].dropna().values
+    perc_series = series / ref_series * 100 - 100  # calculate percentage difference
+    perc_series = np.around(perc_series.astype(float))  # round the result
+    inds = perc_series.argsort()  # get indexes sorted by series
+    x, y = perc_series[inds], series_names[inds]  # sort series and names by above
+    plot_graphs(
+        x,
+        y,
+        list(
+            np.where(x < 0, "red", "green")
+        ),  # set negative bars to red, others to green
+        title,
+        filename[0],
+        width=1200,
+        xlim=[
+            -max(abs(perc_series)) - 3,
+            max(abs(perc_series)) + 3,
+        ],  # symmetric xlim
+    )
