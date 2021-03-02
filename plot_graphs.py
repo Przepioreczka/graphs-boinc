@@ -3,7 +3,6 @@ import sys
 from os import listdir
 
 from get_graphs import compare_plot, multiple_save
-from plot_ovarlayBar import overlay_bar
 
 parser = argparse.ArgumentParser(
     add_help=True,
@@ -11,7 +10,8 @@ parser = argparse.ArgumentParser(
     "directory where xls data is stored. "
     "If not provided in file, "
     "program will ask for filename for png files. \n"
-    "\nDo not mix normal data with comparison or overlay data while specifying directory.",
+    "\nDo not mix normal data with comparison or overlay data "
+                "while specifying directory.",
 )
 
 parser.add_argument("directory", type=str, help="directory where xls data is stored")

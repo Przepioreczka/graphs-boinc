@@ -48,12 +48,7 @@ def plot_graphs(
         ]
     )
     # specifying graph width and height in pixels
-    fig.update_layout(
-        autosize=True,
-        width=width,
-        height=len(x) * 100,
-        showlegend=False
-    )
+    fig.update_layout(autosize=True, width=width, height=len(x) * 100, showlegend=False)
     # specifying title, title position, font
     fig.update_layout(
         title=title,
@@ -71,11 +66,11 @@ def plot_graphs(
 
 
 def overlay_bar(x: pd.Series, y: List[str], colors: List, title: str, filename: str):
-    x = [i.split(';') for i in list(x)]
-    x1 = [float(i[0].replace(',','.')) for i in x]
-    x2 = [float(i[1].replace(',','.')) for i in x]
+    x = [i.split(";") for i in list(x)]
+    x1 = [float(i[0].replace(",", ".")) for i in x]
+    x2 = [float(i[1].replace(",", ".")) for i in x]
     bar_width = np.zeros(len(x)) + 0.8
-    #specifying Bar parameters (x data, y data, orientation: horizontal, width of bars)
+    # specifying Bar parameters (x data, y data, orientation: horizontal, width of bars)
     fig = go.Figure(
         data=[
             go.Bar(
@@ -97,16 +92,11 @@ def overlay_bar(x: pd.Series, y: List[str], colors: List, title: str, filename: 
                 marker_color=colors,
                 width=bar_width,
                 opacity=0.5,
-            )
-
+            ),
         ]
     )
     fig.update_layout(
-        autosize=True,
-        width=1200,
-        height=len(x1) * 100,
-        showlegend=False,
-        bargap=1
+        autosize=True, width=1200, height=len(x1) * 100, showlegend=False, bargap=1
     )
     # specifying title, title position, font
     fig.update_layout(
@@ -115,7 +105,7 @@ def overlay_bar(x: pd.Series, y: List[str], colors: List, title: str, filename: 
         template="simple_white",
         title_font=dict(size=26, color="black"),
     )
-    fig.update_layout(barmode='overlay')
+    fig.update_layout(barmode="overlay")
     fig.write_image(filename + ".png", format="png")
 
 
@@ -133,7 +123,9 @@ def plot_save(graph_plotly: DataPlotly, number: int, overlay: bool) -> None:
     title = (
         graph_plotly.get_title_and_sort()
     )  # extracting title and setting sort (asc/desc)
-    x = graph_plotly.get_series()  # extracting series data in proper order (pandas Series)
+    x = (
+        graph_plotly.get_series()
+    )  # extracting series data in proper order (pandas Series)
     y = graph_plotly.get_y_labels()  # extracting labels in proper order
     colors = graph_plotly.get_colors()  # extracting colors in proper order
     name = graph_plotly.file_names[number - 3]  # extracting file name to save
