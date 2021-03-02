@@ -96,7 +96,7 @@ class DataPlotly(pd.DataFrame):
             .dropna()
             .sort_values(ascending=self.asc)
         )
-        return np.array(data.values).astype(float)
+        return data
 
     def get_y_labels(self) -> List:
         """Function for extracting y_labels in specific order, defined by number and
