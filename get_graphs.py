@@ -31,8 +31,8 @@ def plot_graphs(
     :param width: graph width in pixels, default to 500
     :type width: int
     """
-    # each bar width set to 0.5
-    bar_width = np.zeros(len(x)) + 0.5
+    # each bar width set to 0.8
+    bar_width = np.zeros(len(x)) + 0.8
     # specifying Bar parameters (x data, y data, orientation: horizontal, width of bars)
     fig = go.Figure(
         data=[
@@ -48,12 +48,12 @@ def plot_graphs(
         ]
     )
     # specifying graph width and height in pixels
-    fig.update_layout(autosize=True, width=width, height=len(x) * 100, showlegend=False)
+    fig.update_layout(autosize=True, width=width, height=100+len(x) * 100, showlegend=False)
     # specifying title, title position, font
     fig.update_layout(
         title=title,
         title_x=0.5,
-        template="plotly_white",
+        template="simple_white",
         title_font=dict(size=26, color="black"),
     )
     if xlim:

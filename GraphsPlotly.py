@@ -116,7 +116,7 @@ class DataPlotly(pd.DataFrame):
         bolds = np.array(data.iloc[2])
         bolds = np.where(bolds == 1)[0]
         # Checking if the subheaders are missing values, all nan
-        if subheaders.count(subheaders[0]) == len(subheaders):
+        if subheaders.count(subheaders[0]) == len(subheaders) and subheaders[0]!=subheaders[0]:
             subheaders = ["" for i in range(len(subheaders))]
 
         # We have to combine headers and subheaders into one as y ticks
