@@ -81,7 +81,7 @@ class DataPlotly(pd.DataFrame):
         self.title = title
         # Set the asc to True or False depending on what is specified in title
         self.asc = True
-        if "mniej" in self.title:
+        if "mniej" in self.title or "lower" in self.title:
             self.asc = False
         return title
 
@@ -113,10 +113,13 @@ class DataPlotly(pd.DataFrame):
         headers = list(data.columns)  # names of y ticks
         subheaders = list(data.iloc[0])  # sub names for y ticks
         # which y ticks labels should be bold
-        bolds = np.array(data.iloc[2])
+        bolds = np.array(data.iloc[1])
         bolds = np.where(bolds == 1)[0]
         # Checking if the subheaders are missing values, all nan
-        if subheaders.count(subheaders[0]) == len(subheaders) and subheaders[0]!=subheaders[0]:
+        if (
+            subheaders.count(subheaders[0]) == len(subheaders)
+            and subheaders[0] != subheaders[0]
+        ):
             subheaders = ["" for i in range(len(subheaders))]
 
         # We have to combine headers and subheaders into one as y ticks
@@ -157,5 +160,6 @@ class DataPlotly(pd.DataFrame):
         ] = " grey"  # if color was missing (nan), set to grey
         colors = list(colors)
         # while parsing, occurred some bug, colors codes/names start from second char
-        colors = list(map(lambda q: q[1:], colors))
+        if not all("#" in elem[0] for elem in colors):
+            colors = list(map(lambda q: q[1:], colors))
         return colors

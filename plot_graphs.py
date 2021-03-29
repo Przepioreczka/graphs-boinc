@@ -11,12 +11,19 @@ parser = argparse.ArgumentParser(
     "If not provided in file, "
     "program will ask for filename for png files. \n"
     "\nDo not mix normal data with comparison or overlay data "
-                "while specifying directory.",
+    "while specifying directory.",
 )
 
 parser.add_argument("directory", type=str, help="directory where xls data is stored")
-parser.add_argument("--compare", help="plot comparison bar", action="store_true")
-parser.add_argument("--overlay", help="plot overlay bar", action="store_true")
+parser.add_argument("-C", "--compare", help="plot comparison bar", action="store_true")
+parser.add_argument("-O", "--overlay", help="plot overlay bar", action="store_true")
+parser.add_argument(
+    "-w",
+    "--width",
+    type=int,
+    default=1200,
+    help="The width of graphs in pixels, default to 1200",
+)
 
 # display help if only program name is passed
 parser.parse_args(args=None if sys.argv[1:] else ["--help"])
@@ -33,7 +40,7 @@ if args.compare:
 
 # if it's path for specific xls file
 if ".xls" == direc[-4:]:
-    fun(direc, args.overlay)
+    fun(direc, args.width, args.overlay)
 
 # if it's path to directory where xls files are stored
 else:
@@ -41,4 +48,4 @@ else:
     for file in files:
         if ".xls" == file[-4:]:
             print("Plotting for " + file)
-            fun(direc + file, args.overlay)
+            fun(direc + file, args.width, args.overlay)
